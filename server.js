@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const errorMiddleware = require("./middleware/errorHandler");
 
 const userRoutes = require("./routes/userRoutes");
+const channelRoutes = require("./routes/channelRoutes");
 const checkXApiKeyMiddleware = require("./middleware/headerCheckHandler");
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(checkXApiKeyMiddleware);
 
 // routes
 app.use("/users", userRoutes);
+app.use("/channel", channelRoutes);
 
 // middile wares
 app.use(errorMiddleware);
