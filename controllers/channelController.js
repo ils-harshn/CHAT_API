@@ -57,6 +57,10 @@ exports.addMembers = async (req, res, next) => {
       return res.status(404).json({ error: "Channel not found" });
     }
 
+    if (channel.adminId !== req.user.id) {
+      return res.status(403).json({ error: "Only admin can add users." });
+    }
+
     const existingUsers = await db.user.findAll({ where: { id: userIds } });
     const existingUserIds = existingUsers.map((user) => user.id);
 
