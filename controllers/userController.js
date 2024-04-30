@@ -100,6 +100,14 @@ exports.login = async (req, res, next) => {
       return res.status(404).json({ message: "Email doesn't exists." });
     }
 
+    if (user.is_active === false) {
+      return res.status(403).json({ message: "Inactive user." });
+    }
+
+    if (user.is_verified === false) {
+      return res.status(403).json({ message: "User not verified yet." });
+    }
+
     const password_ENC = SHA256_ENC(password);
     if (password_ENC === user.password) {
       const token = await createToken(user, logoutAll);
@@ -117,4 +125,8 @@ exports.login = async (req, res, next) => {
     console.log(err);
     next(err);
   }
+};
+
+exports.profile = async (req, res, next) => {
+  res.json(req.user);
 };
