@@ -53,6 +53,7 @@ exports.verifyOTP = async (req, res, next) => {
     if (otpRecord.otp === otp && otpRecord.expiresAt > new Date()) {
       user.is_verified = true;
       await user.save();
+      await otpRecord.destroy()
       return res.json({ message: "OTP verified successfully." });
     } else {
       return res.status(400).json({ message: "Invalid or expired OTP." });
