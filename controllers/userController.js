@@ -1,8 +1,13 @@
 const db = require("../db");
 const { sendOTP_Email } = require("../mailer/usersAuthMail");
 const { SHA256_ENC } = require("../utils/encrpt");
-const { generateOTP, saveOTP } = require("../utils/helpers");
-const { signUp_SCH, verifyOTP_SCH, resendOTP_SCH } = require("../utils/schema");
+const { generateOTP, saveOTP, createToken } = require("../utils/helpers");
+const {
+  signUp_SCH,
+  verifyOTP_SCH,
+  resendOTP_SCH,
+  login_SCH,
+} = require("../utils/schema");
 
 exports.signup = async (req, res, next) => {
   try {
@@ -78,6 +83,38 @@ exports.resendOTP = async (req, res, next) => {
     sendOTP_Email(email, OTP);
     return res.json({ message: "OTP resent successfully." });
   } catch (err) {
+    next(err);
+  }
+};
+
+exports.login = async (req, res, next) => {
+  try {
+    const { error, value } = login_SCH.validate(req.body);
+    if (error) {
+      return res.status(422).json({ error: error, message: error.message });
+    }
+    const { email, password } = value;
+    const user = await db.user.findOne({ where: { email: email } });
+
+    if (!user) {
+      return res.status(404).json({ message: "Email doesn't exists." });
+    }
+
+    const password_ENC = SHA256_ENC(password);
+    if (password_ENC === user.password) {
+      const token = await createToken(user);
+      res.json({
+        tid: token.id,
+        uid: token.userId,
+        token: token.token,
+      });
+    } else {
+      res.status(404).json({
+        message: "Invalid Credentials",
+      });
+    }
+  } catch (err) {
+    console.log(err);
     next(err);
   }
 };

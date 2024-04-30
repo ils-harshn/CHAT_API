@@ -7,3 +7,13 @@ exports.SHA256_ENC = (data) => {
   const hash = hmac.digest("hex");
   return hash;
 };
+
+exports.GENERATE_TOKEN = (email, id) => {
+  let secret_key = process.env.SECRET_KEY;
+  let currentTime = Date.now().toString();
+  const hash = crypto
+    .createHmac("sha256", secret_key)
+    .update(email + id + currentTime)
+    .digest("hex");
+  return hash;
+};
