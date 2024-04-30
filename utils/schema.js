@@ -20,12 +20,16 @@ const verifyOTP_SCH = Joi.object({
     .pattern(/^\d{6}$/)
     .required()
     .messages({
-      "string.pattern.base":
-        "OTP must be at 6 digit number string",
+      "string.pattern.base": "OTP must be at 6 digit number string",
     }),
+});
+
+const resendOTP_SCH = Joi.object({
+  email: Joi.string().email().required(),
 });
 
 module.exports = {
   signUp_SCH,
   verifyOTP_SCH,
+  resendOTP_SCH,
 };

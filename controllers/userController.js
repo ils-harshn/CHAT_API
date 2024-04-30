@@ -2,7 +2,7 @@ const db = require("../db");
 const { sendOTP_Email } = require("../mailer/usersAuthMail");
 const { SHA256_ENC } = require("../utils/encrpt");
 const { generateOTP, saveOTP } = require("../utils/helpers");
-const { signUp_SCH, verifyOTP_SCH } = require("../utils/schema");
+const { signUp_SCH, verifyOTP_SCH, resendOTP_SCH } = require("../utils/schema");
 
 exports.signup = async (req, res, next) => {
   try {
@@ -52,6 +52,31 @@ exports.verifyOTP = async (req, res, next) => {
     } else {
       return res.status(400).json({ message: "Invalid or expired OTP." });
     }
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.resendOTP = async (req, res, next) => {
+  try {
+    const { error, value } = resendOTP_SCH.validate(req.body);
+    if (error) {
+      return res.status(422).json({ error: error, message: error.message });
+    }
+    const { email } = value;
+    const user = await db.user.findOne({ where: { email: email } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.is_verified) {
+      return res.status(404).json({ message: "User already verified." });
+    }
+
+    const OTP = generateOTP();
+    await saveOTP(user.id, OTP);
+    sendOTP_Email(email, OTP);
+    return res.json({ message: "OTP resent successfully." });
   } catch (err) {
     next(err);
   }
