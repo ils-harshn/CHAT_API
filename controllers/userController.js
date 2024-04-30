@@ -1,4 +1,6 @@
 const db = require("../db");
+const { sendOTP_Email } = require("../mailer/usersAuthMail");
+const { generateOTP, saveOTP } = require("../utils/helpers");
 const { signUp_SCH } = require("../utils/schema");
 
 exports.getAllUsers = async (req, res, next) => {
@@ -19,7 +21,10 @@ exports.signup = async (req, res, next) => {
       return res.status(422).json({ error: error, message: error.message });
     }
     const newUser = await db.user.create(value);
-    res.json(value);
+    const OTP = generateOTP();
+    await saveOTP(newUser.id, OTP);
+    sendOTP_Email(value.email, OTP);
+    res.json(newUser);
   } catch (err) {
     next(err);
   }

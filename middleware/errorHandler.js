@@ -1,7 +1,6 @@
 function errorMiddleware(error, req, res, next) {
   let status = null;
   let message = null;
-  console.log(error);
 
   switch (error.name) {
     case "SequelizeUniqueConstraintError":

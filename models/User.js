@@ -24,5 +24,7 @@ module.exports = (sequelize, Sequelize) => {
     },
   });
 
+  User.hasOne(sequelize.models.OTP, { foreignKey: 'userId' });
+
   return User;
 };
