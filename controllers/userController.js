@@ -7,7 +7,7 @@ const {
   verifyOTP_SCH,
   resendOTP_SCH,
   login_SCH,
-} = require("../utils/schema");
+} = require("../schemas/auth");
 
 exports.signup = async (req, res, next) => {
   try {
@@ -53,7 +53,7 @@ exports.verifyOTP = async (req, res, next) => {
     if (otpRecord.otp === otp && otpRecord.expiresAt > new Date()) {
       user.is_verified = true;
       await user.save();
-      await otpRecord.destroy()
+      await otpRecord.destroy();
       return res.json({ message: "OTP verified successfully." });
     } else {
       return res.status(400).json({ message: "Invalid or expired OTP." });
@@ -129,5 +129,7 @@ exports.login = async (req, res, next) => {
 };
 
 exports.profile = async (req, res, next) => {
-  res.json(req.user);
+  res.json({
+    email: req.user.email,
+  });
 };
