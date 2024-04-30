@@ -1,4 +1,5 @@
 const db = require("../db");
+const Channel = require("../models/Channel");
 const { createChannel_SCH } = require("../schemas/channel");
 
 exports.create = async (req, res, next) => {
@@ -14,6 +15,26 @@ exports.create = async (req, res, next) => {
     await channel.addMembers([req.user.id]);
     res.json(channel);
   } catch (err) {
+    next(err);
+  }
+};
+
+exports.list = async (req, res, next) => {
+  try {
+    const user = await db.user.findByPk(req.user.id, {
+      include: [
+        {
+          model: db.channel,
+          as: "channels",
+          attributes: ["id", "name", "adminId"],
+          through: { attributes: [] },
+        },
+      ],
+    });
+
+    res.json(user.channels);
+  } catch (err) {
+    console.log(err);
     next(err);
   }
 };

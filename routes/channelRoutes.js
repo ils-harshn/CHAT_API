@@ -6,5 +6,6 @@ const authMiddleware = require("../middleware/authHandler");
 router.use(authMiddleware);
 
 router.post("/create", channelController.create);
+router.post("/list", channelController.list);
 
 module.exports = router;
