@@ -40,6 +40,7 @@ const login_SCH = Joi.object({
       "string.pattern.base":
         "Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, one number, and one special character.",
     }),
+  logoutAll: Joi.boolean().optional().default(false),
 });
 
 module.exports = {

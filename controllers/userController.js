@@ -93,7 +93,7 @@ exports.login = async (req, res, next) => {
     if (error) {
       return res.status(422).json({ error: error, message: error.message });
     }
-    const { email, password } = value;
+    const { email, password, logoutAll } = value;
     const user = await db.user.findOne({ where: { email: email } });
 
     if (!user) {
@@ -102,7 +102,7 @@ exports.login = async (req, res, next) => {
 
     const password_ENC = SHA256_ENC(password);
     if (password_ENC === user.password) {
-      const token = await createToken(user);
+      const token = await createToken(user, logoutAll);
       res.json({
         tid: token.id,
         uid: token.userId,
