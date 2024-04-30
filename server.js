@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const errorMiddleware = require("./middleware/errorHandler");
 
 const userRoutes = require("./routes/userRoutes");
+const checkXApiKeyMiddleware = require("./middleware/headerCheckHandler");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -13,6 +14,7 @@ const PORT = process.env.PORT;
 // middlewares
 app.use(requestIp.mw());
 app.use(bodyParser.json());
+app.use(checkXApiKeyMiddleware);
 
 // routes
 app.use("/users", userRoutes);
