@@ -27,7 +27,6 @@ exports.create = async (req, res, next) => {
 
     res.json(space);
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
