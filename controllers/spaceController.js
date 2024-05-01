@@ -90,3 +90,39 @@ exports.addMembers = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.list = async (req, res, next) => {
+  try {
+    const channelId = req.params.channelId;
+
+    const channel = await db.channel.findOne({
+      where: { id: channelId },
+      include: [
+        {
+          model: db.space,
+          as: "spaces",
+          include: [
+            {
+              model: db.user,
+              as: "members",
+              where: { id: req.user.id },
+              attributes: [],
+            },
+          ],
+          attributes: ["id", "name", "type"],
+        },
+      ],
+    });
+
+    if (!channel) {
+      return res
+        .status(403)
+        .json({ error: "Yor are not part of this channel" });
+    }
+
+    res.json(channel.spaces);
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+};
