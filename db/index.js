@@ -17,6 +17,7 @@ db.user = require("../models/User.js")(sequelize, Sequelize);
 db.channel = require("../models/Channel.js")(sequelize, Sequelize);
 db.user_channel = require("../models/UserChannel.js")(sequelize, Sequelize);
 db.space = require("../models/Space.js")(sequelize, Sequelize);
+db.space_user = require("../models/SpaceUser.js")(sequelize, Sequelize);
 
 // user channel relations
 db.user.hasMany(db.channel, { foreignKey: "adminId", as: "adminOfChannels" });
@@ -32,13 +33,24 @@ db.channel.belongsToMany(db.user, {
   as: "members",
 });
 
-
 // channels spaces relations
 db.channel.hasMany(db.space, {
   foreignKey: "channelId",
   as: "spaces",
 });
 db.space.belongsTo(db.channel, { foreignKey: "channelId", as: "channel" });
+
+// space user relations
+db.space.belongsToMany(db.user, {
+  through: db.space_user,
+  foreignKey: "spaceId",
+  as: "members",
+});
+db.user.belongsToMany(db.space, {
+  through: db.space_user,
+  foreignKey: "userId",
+  as: "spaces",
+});
 
 db.sequelize
   .sync()

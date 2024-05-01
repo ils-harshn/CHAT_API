@@ -25,6 +25,8 @@ exports.create = async (req, res, next) => {
       type: "MANY",
     });
 
+    await space.addMembers([req.user.id]);
+
     res.json(space);
   } catch (err) {
     next(err);
