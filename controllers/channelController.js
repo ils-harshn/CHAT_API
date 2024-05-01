@@ -1,5 +1,4 @@
 const db = require("../db");
-const Channel = require("../models/Channel");
 const {
   createChannel_SCH,
   addMembersInChannel_SCH,
