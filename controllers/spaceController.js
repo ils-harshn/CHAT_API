@@ -1,5 +1,5 @@
 const db = require("../db");
-const { createSpace_SCH } = require("../schemas/space");
+const { createSpace_SCH, addMembersInSpace_SCH } = require("../schemas/space");
 
 exports.create = async (req, res, next) => {
   try {
@@ -29,6 +29,64 @@ exports.create = async (req, res, next) => {
 
     res.json(space);
   } catch (err) {
+    next(err);
+  }
+};
+
+exports.addMembers = async (req, res, next) => {
+  try {
+    const { error, value } = addMembersInSpace_SCH.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    const channelId = req.params.channelId;
+    const spaceId = req.params.spaceId;
+    const { userIds } = value;
+
+    const space = await db.space.findByPk(spaceId);
+
+    if (!space) {
+      return res.status(404).json({ error: "Space not found" });
+    }
+
+    if (space.channelId !== parseInt(channelId)) {
+      return res.status(404).json({ error: "Space not found in this channel" });
+    }
+
+    const space_user = await db.space_user.findAll({
+      where: {
+        spaceId: spaceId,
+        userId: req.user.id,
+      },
+    });
+
+    if (!space_user) {
+      return res
+        .status(404)
+        .json({ error: "You are not a part of this space." });
+    }
+
+    const existingUsersChs = await db.user_channel.findAll({
+      where: { userId: userIds, channelId: channelId },
+    });
+    const existingUserIds = existingUsersChs.map((userChs) => userChs.userId);
+
+    const invalidUserIds = userIds.filter(
+      (userId) => !existingUserIds.includes(userId)
+    );
+
+    if (invalidUserIds.length > 0) {
+      return res
+        .status(400)
+        .json({ error: "Invalid user IDs", invalidUserIds });
+    }
+
+    await space.addMembers(userIds);
+
+    res.json({ message: "Members added successfully" });
+  } catch (err) {
+    console.error(err);
     next(err);
   }
 };

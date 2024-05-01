@@ -91,8 +91,16 @@ exports.getMembers = async (req, res, next) => {
       return res.status(404).json({ error: "Channel not found" });
     }
 
-    if (channel.adminId !== req.user.id) {
-      return res.status(403).json({ error: "Only admin can add users." });
+    // have to add another logic
+    // if user exists in this channel only then give this information
+    const user_channel = await db.user_channel.findOne({
+      where: {
+        userId: req.user.id,
+        channelId: channelId,
+      },
+    });
+    if (!user_channel) {
+      return res.status(403).json({ error: "Yor are not part of this channel" });
     }
 
     const members = await channel.getMembers({
