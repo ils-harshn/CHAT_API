@@ -11,4 +11,4 @@ const addMembersInSpace_SCH = Joi.object({
     .required(),
 });
 
-module.exports = { addMembersInSpace_SCH };
+module.exports = { addMembersInSpace_SCH, createSpace_SCH };
