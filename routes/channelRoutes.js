@@ -8,5 +8,6 @@ router.use(authMiddleware);
 router.post("/create", channelController.create);
 router.post("/list", channelController.list);
 router.post("/:channelId/addMembers", channelController.addMembers);
+router.post("/:channelId/getMembers", channelController.getMembers);
 
 module.exports = router;

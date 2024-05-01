@@ -81,3 +81,26 @@ exports.addMembers = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getMembers = async (req, res, next) => {
+  try {
+    const channelId = req.params.channelId;
+
+    const channel = await db.channel.findByPk(channelId);
+    if (!channel) {
+      return res.status(404).json({ error: "Channel not found" });
+    }
+
+    if (channel.adminId !== req.user.id) {
+      return res.status(403).json({ error: "Only admin can add users." });
+    }
+
+    const members = await channel.getMembers({
+      attributes: ["id", "email"],
+      joinTableAttributes: [],
+    });
+    res.json(members);
+  } catch (err) {
+    next(err);
+  }
+};
