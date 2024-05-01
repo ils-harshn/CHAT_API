@@ -100,7 +100,9 @@ exports.getMembers = async (req, res, next) => {
       },
     });
     if (!user_channel) {
-      return res.status(403).json({ error: "Yor are not part of this channel" });
+      return res
+        .status(403)
+        .json({ error: "Yor are not part of this channel" });
     }
 
     const members = await channel.getMembers({

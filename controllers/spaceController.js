@@ -44,7 +44,16 @@ exports.addMembers = async (req, res, next) => {
     const spaceId = req.params.spaceId;
     const { userIds } = value;
 
-    const space = await db.space.findByPk(spaceId);
+    const space = await db.space.findOne({
+      where: { id: spaceId },
+      include: [
+        {
+          model: db.user,
+          as: "members",
+          where: { id: req.user.id },
+        },
+      ],
+    });
 
     if (!space) {
       return res.status(404).json({ error: "Space not found" });
@@ -52,19 +61,6 @@ exports.addMembers = async (req, res, next) => {
 
     if (space.channelId !== parseInt(channelId)) {
       return res.status(404).json({ error: "Space not found in this channel" });
-    }
-
-    const space_user = await db.space_user.findAll({
-      where: {
-        spaceId: spaceId,
-        userId: req.user.id,
-      },
-    });
-
-    if (!space_user) {
-      return res
-        .status(404)
-        .json({ error: "You are not a part of this space." });
     }
 
     const existingUsersChs = await db.user_channel.findAll({
