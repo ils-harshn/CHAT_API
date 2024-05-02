@@ -1,4 +1,5 @@
 const db = require("../db");
+const { DB_CONFIG } = require("../db/config");
 const { createMessage_SCH } = require("../schemas/message");
 
 exports.create = async (req, res, next) => {
@@ -64,11 +65,27 @@ exports.getMessages = async (req, res, next) => {
     }
 
     const page = req.query.page ? parseInt(req.query.page) : 1;
-    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const limit = req.query.limit
+      ? parseInt(req.query.limit)
+      : DB_CONFIG.PAGE_LIMIT;
 
     const totalMessagesCount = await space.countMessages();
-
+    const totalPages = Math.ceil(totalMessagesCount / limit);
     const offset = Math.max(0, totalMessagesCount - page * limit);
+
+    const nextPage = page < totalPages ? page + 1 : null;
+    const prevPage = page > 1 ? page - 1 : null;
+
+    if (page > totalPages || page < 1) {
+      return res.status(404).json({
+        error: "Page not found.",
+        page,
+        count: totalMessagesCount,
+        totalPages,
+        nextPage,
+        prevPage,
+      });
+    }
 
     const messages = await space.getMessages({
       limit,
@@ -76,7 +93,16 @@ exports.getMessages = async (req, res, next) => {
       order: [["createdAt", "DESC"]],
     });
 
-    res.json(messages);
+    const result = {
+      page,
+      count: totalMessagesCount,
+      messages,
+      totalPages,
+      nextPage,
+      prevPage,
+    };
+
+    res.json(result);
   } catch (err) {
     next(err);
   }
