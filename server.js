@@ -8,6 +8,7 @@ const errorMiddleware = require("./middleware/errorHandler");
 const userRoutes = require("./routes/userRoutes");
 const channelRoutes = require("./routes/channelRoutes");
 const spaceRoutes = require("./routes/spaceRoutes");
+const messageRoutes = require("./routes/messageRoutes");
 const checkXApiKeyMiddleware = require("./middleware/headerCheckHandler");
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(checkXApiKeyMiddleware);
 app.use("/users", userRoutes);
 app.use("/channel", channelRoutes);
 app.use("/space", spaceRoutes);
+app.use("/message", messageRoutes);
 
 // middile wares
 app.use(errorMiddleware);

@@ -37,7 +37,6 @@ exports.create = async (req, res, next) => {
 
     res.json(space);
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
@@ -223,7 +222,6 @@ exports.create2WAY = async (req, res, next) => {
 
     res.json(space);
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };

@@ -53,9 +53,11 @@ db.user.belongsToMany(db.space, {
   as: "spaces",
 });
 
-// message space relation
+// user, message and space relation
 db.space.hasMany(db.message, { foreignKey: "spaceId", as: "messages" });
 db.message.belongsTo(db.space, { foreignKey: "spaceId", as: "space" });
+db.user.hasMany(db.message, { foreignKey: "userId", as: "messages" });
+db.message.belongsTo(db.user, { foreignKey: "userId", as: "user" });
 
 db.sequelize
   .sync()

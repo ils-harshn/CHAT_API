@@ -36,7 +36,6 @@ exports.list = async (req, res, next) => {
 
     res.json(user.channels);
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
