@@ -123,3 +123,34 @@ exports.list = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getMembers = async (req, res, next) => {
+  try {
+    const channelId = req.params.channelId;
+    const spaceId = req.params.spaceId;
+
+    const space = await db.space.findByPk(spaceId);
+
+    if (!space) {
+      return res.status(403).json({ error: "Space not found" });
+    }
+
+    if (space.channelId !== parseInt(channelId)) {
+      return res.status(404).json({ error: "Space not found in this channel" });
+    }
+
+    const isMember = await space.hasMember(req.user.id);
+
+    if (!isMember) {
+      return res.status(404).json({ error: "Space not found" });
+    }
+
+    const members = await space.getMembers({
+      attributes: ["id", "email"],
+      joinTableAttributes: [],
+    });
+    res.json(members);
+  } catch (err) {
+    next(err);
+  }
+};
