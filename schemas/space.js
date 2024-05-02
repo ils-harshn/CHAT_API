@@ -11,4 +11,12 @@ const addMembersInSpace_SCH = Joi.object({
     .required(),
 });
 
-module.exports = { addMembersInSpace_SCH, createSpace_SCH };
+const create2WAYSpace_SCH = Joi.object({
+  userId: Joi.number().integer().positive().required(),
+});
+
+module.exports = {
+  addMembersInSpace_SCH,
+  createSpace_SCH,
+  create2WAYSpace_SCH,
+};

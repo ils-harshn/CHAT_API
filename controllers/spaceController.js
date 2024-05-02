@@ -1,5 +1,9 @@
 const db = require("../db");
-const { createSpace_SCH, addMembersInSpace_SCH } = require("../schemas/space");
+const {
+  createSpace_SCH,
+  addMembersInSpace_SCH,
+  create2WAYSpace_SCH,
+} = require("../schemas/space");
 
 exports.create = async (req, res, next) => {
   try {
@@ -151,6 +155,65 @@ exports.getMembers = async (req, res, next) => {
     });
     res.json(members);
   } catch (err) {
+    next(err);
+  }
+};
+
+exports.create2WAY = async (req, res, next) => {
+  try {
+    const { error, value } = create2WAYSpace_SCH.validate(req.body);
+    if (error) {
+      return res.status(422).json({ error: error, message: error.message });
+    }
+
+    const { userId } = value;
+
+    const channelId = req.params.channelId;
+    const channel = await db.channel.findByPk(channelId);
+
+    if (!channel) {
+      return res.status(403).json({ error: "Channel not found" });
+    }
+
+    const userIds = [req.user.id, userId];
+
+    const isAllMembers = await channel.hasMembers(userIds);
+
+    if (!isAllMembers) {
+      return res.status(403).json({ error: "Invalid user IDs given." });
+    }
+
+    const ex_space = await channel.getSpaces({
+      where: { type: "2WAY" },
+      include: [
+        {
+          model: db.user,
+          as: "members",
+          where: { id: userIds },
+          through: { attributes: [] },
+        },
+      ],
+      group: ["Space.id"],
+      having: db.Sequelize.literal("COUNT(members.id) = 2"),
+    });
+
+    if (ex_space.length) {
+      return res
+        .status(403)
+        .json({ error: "Space already exists with these user IDs." });
+    }
+
+    const space = await db.space.create({
+      name: `${userIds[0]}.${userIds[1]}`,
+      channelId: channelId,
+      type: "2WAY",
+    });
+
+    await space.addMembers(userIds);
+
+    res.json(space);
+  } catch (err) {
+    console.log(err);
     next(err);
   }
 };
