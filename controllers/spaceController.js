@@ -1,5 +1,9 @@
 const db = require("../db");
 const {
+  SPACE_MANY_TYPE,
+  SPACE_2WAY_TYPE,
+} = require("../models/types/Space.types");
+const {
   createSpace_SCH,
   addMembersInSpace_SCH,
   create2WAYSpace_SCH,
@@ -26,7 +30,7 @@ exports.create = async (req, res, next) => {
     const space = await db.space.create({
       name: value.name,
       channelId: channelId,
-      type: "MANY",
+      type: SPACE_MANY_TYPE,
     });
 
     await space.addMembers([req.user.id]);
@@ -62,6 +66,12 @@ exports.addMembers = async (req, res, next) => {
 
     if (!space) {
       return res.status(404).json({ error: "Space not found" });
+    }
+
+    if (space.type !== SPACE_MANY_TYPE) {
+      return res
+        .status(404)
+        .json({ error: "Space is not allowed to add members" });
     }
 
     if (space.channelId !== parseInt(channelId)) {
@@ -184,7 +194,7 @@ exports.create2WAY = async (req, res, next) => {
     }
 
     const ex_space = await channel.getSpaces({
-      where: { type: "2WAY" },
+      where: { type: SPACE_2WAY_TYPE },
       include: [
         {
           model: db.user,
@@ -206,7 +216,7 @@ exports.create2WAY = async (req, res, next) => {
     const space = await db.space.create({
       name: `${userIds[0]}.${userIds[1]}`,
       channelId: channelId,
-      type: "2WAY",
+      type: SPACE_2WAY_TYPE,
     });
 
     await space.addMembers(userIds);
