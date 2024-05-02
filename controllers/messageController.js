@@ -58,10 +58,23 @@ exports.getMessages = async (req, res, next) => {
     const isMember = await space.hasMember(req.user.id);
 
     if (!isMember) {
-      return res.status(404).json({ error: "Space not found" });
+      return res
+        .status(404)
+        .json({ error: "You are not a member of this space" });
     }
 
-    const messages = await space.getMessages();
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+
+    const totalMessagesCount = await space.countMessages();
+
+    const offset = Math.max(0, totalMessagesCount - page * limit);
+
+    const messages = await space.getMessages({
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
 
     res.json(messages);
   } catch (err) {
