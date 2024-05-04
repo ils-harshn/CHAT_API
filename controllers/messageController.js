@@ -90,8 +90,9 @@ exports.getMessages = async (req, res, next) => {
     const messages = await space.getMessages({
       limit,
       offset,
-      order: [["createdAt", "DESC"]],
     });
+
+    // messages.reverse();
 
     const result = {
       page,
