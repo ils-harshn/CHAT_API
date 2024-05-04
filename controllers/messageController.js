@@ -1,5 +1,6 @@
 const db = require("../db");
 const { DB_CONFIG } = require("../db/config");
+const { MESSAGE_STATUS_TYPE } = require("../models/types/MessageStatus.types");
 const { createMessage_SCH } = require("../schemas/message");
 
 exports.create = async (req, res, next) => {
@@ -34,6 +35,21 @@ exports.create = async (req, res, next) => {
       message: content,
       userId: req.user.id,
     });
+
+    const memberIds = (await space.getMembers({ attributes: ["id"] })).map(
+      (member) => member.id
+    );
+
+    const statusData = memberIds.map((memberId) => ({
+      messageId: message.id,
+      userId: memberId,
+      status:
+        memberId === req.user.id
+          ? MESSAGE_STATUS_TYPE.SEEN
+          : MESSAGE_STATUS_TYPE.PENDING,
+    }));
+
+    await db.message_status.bulkCreate(statusData);
 
     res.json(message);
   } catch (err) {
@@ -90,6 +106,15 @@ exports.getMessages = async (req, res, next) => {
     const messages = await space.getMessages({
       limit,
       offset,
+      include: [
+        {
+          model: db.message_status,
+          as: "status",
+          where: { userId: req.user.id },
+          required: false,
+          attributes: ["status", ["updatedAt", "at"]],
+        },
+      ],
     });
 
     // messages.reverse();
